@@ -1,16 +1,18 @@
 import { test, expect } from '@playwright/test';
-import { DynamicLoadingPage } from '../pages/DynamicLoadingPage';
+import { IFramePage } from '../pages/IFramePage';
 
-test('Verify dynamic loading', async ({ page }) => {
+test('Verify iFrame Text Editing', async ({ page }) => {
 
-    await page.goto('https://the-internet.herokuapp.com/dynamic_loading/2');
+    await page.goto('https://the-internet.herokuapp.com/iframe');
 
-    const dynamicLoadingPage = new DynamicLoadingPage(page);
+    const iframePage = new IFramePage(page);
 
-    await dynamicLoadingPage.startLoading();
+    await iframePage.writeText('Hello Dana - Playwright iFrame Test');
+
+    await expect(iframePage.editor)
+        .toHaveText('Hello Dana - Playwright iFrame Test');
 
     await page.pause();
 
-    await expect(dynamicLoadingPage.finishText).toBeVisible();
 
 });

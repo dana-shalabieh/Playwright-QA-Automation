@@ -12,6 +12,6 @@ test('Verify file upload', async ({ page }) => {
     await page.locator('#file-submit').click();
 
     await expect(page.locator('#uploaded-files')).toContainText('test-file.txt');
-    await page.pause();
 
+    await page.pause();
 });
