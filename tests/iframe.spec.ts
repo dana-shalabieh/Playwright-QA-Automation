@@ -1,17 +1,14 @@
-
-import { test, expect } from '@playwright/test';
+﻿import { test, expect } from '@playwright/test';
 import { IFramePage } from '../pages/IFramePage';
 
 test('Verify iframe editor is read-only', async ({ page }) => {
-    await page.goto('https://the-internet.herokuapp.com/iframe');
-
     const iframePage = new IFramePage(page);
 
-    await expect(iframePage.editor).toHaveAttribute(
-        'contenteditable',
-        'false'
-    );
+    // استخدام دالة goto المنظمة
+    await iframePage.goto();
 
-    await page.pause();
+    // التحقق من أن المحرر غير قابل للتعديل (read-only) مع مهلة انتظار 15 ثانية
+    await expect(iframePage.editor).toHaveAttribute('contenteditable', 'false', {
+        timeout: 15000
+    });
 });
-

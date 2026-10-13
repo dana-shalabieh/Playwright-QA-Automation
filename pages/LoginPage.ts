@@ -1,4 +1,4 @@
-import { Page, Locator } from '@playwright/test';
+﻿import { Page, Locator } from '@playwright/test';
 
 export class LoginPage {
     readonly page: Page;
@@ -9,9 +9,17 @@ export class LoginPage {
     constructor(page: Page) {
         this.page = page;
 
-        this.usernameInput = page.locator('#user-name');
-        this.passwordInput = page.locator('#password');
-        this.loginButton = page.locator('#login-button');
+        // استخدام data-test هو المعيار الذهبي في موقع SauceDemo
+        this.usernameInput = page.locator('[data-test="username"]');
+        this.passwordInput = page.locator('[data-test="password"]');
+        this.loginButton = page.locator('[data-test="login-button"]');
+    }
+
+    async goto() {
+        await this.page.goto('https://www.saucedemo.com/', {
+            waitUntil: 'domcontentloaded',
+            timeout: 60000
+        });
     }
 
     async login(user: string, pass: string) {
