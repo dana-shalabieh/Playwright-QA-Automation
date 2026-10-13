@@ -1,18 +1,56 @@
 import { test, expect } from '@playwright/test';
+import { LoginPage } from '../pages/LoginPage';
+import { ProductsPage } from '../pages/ProductsPage';
 
-test('has title', async ({ page }) => {
-  await page.goto('https://playwright.dev/');
+test('User can login and complete checkout', async ({ page }) => {
 
-  // Expect a title "to contain" a substring.
-  await expect(page).toHaveTitle(/Playwright/);
+    const loginPage = new LoginPage(page);
+    const productsPage = new ProductsPage(page);
+
+    await page.goto('/');
+
+    await loginPage.login('standard_user', 'secret_sauce');
+
+    await expect(productsPage.productsTitle).toBeVisible();
+
+    await productsPage.addProductToCart('Sauce Labs Backpack');
+
+    await productsPage.openCart();
+
+    await expect(page.getByText('Sauce Labs Backpack')).toBeVisible();
+
+    await page.getByRole('button', { name: 'Checkout' }).click();
+
+    await page.getByPlaceholder('First Name').fill('Test');
+    await page.getByPlaceholder('Last Name').fill('User');
+    await page.getByPlaceholder('Zip/Postal Code').fill('12345');
+
+    await page.getByRole('button', { name: 'Continue' }).click();
+
+    await page.getByRole('button', { name: 'Finish' }).click();
+
+    await expect(page.getByText('Thank you for your order!')).toBeVisible();
 });
 
-test('get started link', async ({ page }) => {
-  await page.goto('https://playwright.dev/');
 
-  // Click the get started link.
-  await page.getByRole('link', { name: 'Get started' }).click();
+test('User can sort products by price', async ({ page }) => {
 
-  // Expects page to have a heading with the name of Installation.
-  await expect(page.getByRole('heading', { name: 'Installation' })).toBeVisible();
+    const loginPage = new LoginPage(page);
+    const productsPage = new ProductsPage(page);
+
+    await page.goto('/');
+
+    await loginPage.login('standard_user', 'secret_sauce');
+
+    await expect(productsPage.productsTitle).toBeVisible();
+
+    const pricesBeforeSorting = await productsPage.getProductPrices();
+
+    await productsPage.sortProducts('lohi');
+
+    const pricesAfterSorting = await productsPage.getProductPrices();
+
+    const expectedPrices = [...pricesBeforeSorting].sort((a, b) => a - b);
+
+    expect(pricesAfterSorting).toEqual(expectedPrices);
 });

@@ -1,36 +1,43 @@
-﻿import { Page, Locator } from '@playwright/test';
+// JavaScript source code
+import { Page, Locator } from '@playwright/test';
 
 export class ProductsPage {
     readonly page: Page;
-    readonly products: Locator;
+    readonly productsTitle: Locator;
+    readonly cartButton: Locator;
     readonly sortDropdown: Locator;
-    readonly addToCartButton: Locator;
-    readonly cartLink: Locator;
+    readonly productPrices: Locator;
 
     constructor(page: Page) {
         this.page = page;
 
-        this.products = page.locator('.inventory_item');
+        this.productsTitle = page.getByText('Products');
+        this.cartButton = page.locator('.shopping_cart_link');
         this.sortDropdown = page.locator('.product_sort_container');
-        this.addToCartButton = page.locator('.inventory_item').first().getByRole('button', { name: /Add to cart/i });
-        this.cartLink = page.locator('.shopping_cart_link');
+        this.productPrices = page.locator('.inventory_item_price');
     }
 
-    async getProductCount() {
-        return await this.products.count();
+    async addProductToCart(productName: string) {
+        const product = this.page.locator('.inventory_item').filter({
+            hasText: productName
+        });
+
+        await product.getByRole('button', { name: 'Add to cart' }).click();
     }
 
     async sortProducts(option: string) {
         await this.sortDropdown.selectOption(option);
     }
-    async getProductPrices() {
-        return await this.products.locator('.inventory_item_price').allTextContents();
-    }
-    async addFirstProductToCart() {
-        await this.addToCartButton.click();
+
+    async getProductPrices(): Promise<number[]> {
+        const prices = await this.productPrices.allTextContents();
+
+        return prices.map(price =>
+            Number(price.replace('$', ''))
+        );
     }
 
     async openCart() {
-        await this.cartLink.click();
+        await this.cartButton.click();
     }
 }

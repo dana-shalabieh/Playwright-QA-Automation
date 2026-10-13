@@ -1,4 +1,5 @@
-﻿import { Page, Locator } from '@playwright/test';
+// JavaScript source code
+import { Page, Locator } from '@playwright/test';
 
 export class LoginPage {
     readonly page: Page;
@@ -9,17 +10,9 @@ export class LoginPage {
     constructor(page: Page) {
         this.page = page;
 
-        // استخدام data-test هو المعيار الذهبي في موقع SauceDemo
-        this.usernameInput = page.locator('[data-test="username"]');
-        this.passwordInput = page.locator('[data-test="password"]');
-        this.loginButton = page.locator('[data-test="login-button"]');
-    }
-
-    async goto() {
-        await this.page.goto('https://www.saucedemo.com/', {
-            waitUntil: 'domcontentloaded',
-            timeout: 60000
-        });
+        this.usernameInput = page.getByPlaceholder('Username');
+        this.passwordInput = page.getByPlaceholder('Password');
+        this.loginButton = page.getByRole('button', { name: 'Login' });
     }
 
     async login(user: string, pass: string) {

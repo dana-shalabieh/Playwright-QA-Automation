@@ -1,24 +1,47 @@
 ﻿import { test, expect } from '@playwright/test';
-import { FramesPage } from '../pages/FramesPage';
 
-test('Verify Nested Frames content on all browsers', async ({ page }) => {
-    const framesPage = new FramesPage(page);
+test('User can interact with frames and iframes', async ({ page }) => {
+    test.setTimeout(120000);
 
-    await framesPage.goto();
+    // Nested Frames
+    await page.goto('https://the-internet.herokuapp.com/nested_frames', {
+        waitUntil: 'domcontentloaded',
+        timeout: 90000
+    });
 
-    // التحقق من الـ frame الأيسر
-    const leftText = await framesPage.getLeftFrameText();
-    expect(leftText.trim()).toContain('LEFT');
+    // انتظار إضافي لتحميل الـ frames
+    await page.waitForTimeout(5000);
 
-    // التحقق من الـ frame الأوسط
-    const middleText = await framesPage.getMiddleFrameText();
-    expect(middleText.trim()).toContain('MIDDLE');
+    const topFrame = page.frameLocator('frame[name="frame-top"]');
 
-    // التحقق من الـ frame الأيمن
-    const rightText = await framesPage.getRightFrameText();
-    expect(rightText.trim()).toContain('RIGHT');
+    // استخدام textContent() مع trim() بدلاً من toContainText
+    const leftText = await topFrame.frameLocator('frame[name="frame-left"]').locator('body').textContent();
+    expect(leftText?.trim()).toBe('LEFT');
 
-    // التحقق من الـ frame السفلي
-    const bottomText = await framesPage.getBottomFrameText();
-    expect(bottomText.trim()).toContain('BOTTOM');
+    const middleText = await topFrame.frameLocator('frame[name="frame-middle"]').locator('body').textContent();
+    expect(middleText?.trim()).toBe('MIDDLE');
+
+    const rightText = await topFrame.frameLocator('frame[name="frame-right"]').locator('body').textContent();
+    expect(rightText?.trim()).toBe('RIGHT');
+
+    // Bottom Frame
+    const bottomFrame = page.frameLocator('frame[name="frame-bottom"]');
+    const bottomText = await bottomFrame.locator('body').textContent();
+    expect(bottomText?.trim()).toBe('BOTTOM');
+
+    // iFrame
+    await page.goto('https://the-internet.herokuapp.com/iframe', {
+        waitUntil: 'domcontentloaded',
+        timeout: 90000
+    });
+
+    // انتظار تحميل الـ iframe
+    await page.waitForTimeout(2000);
+
+    const editor = page.frameLocator('iframe[id^="mce_"]').locator('body#tinymce');
+
+    await expect(editor).toBeVisible({ timeout: 30000 });
+    await expect(editor).toContainText('Your content goes here.', {
+        timeout: 30000
+    });
 });

@@ -1,16 +1,16 @@
-﻿import { test, expect } from '@playwright/test';
-import { DynamicLoadingPage } from '../pages/DynamicLoadingPage';
+import { test, expect } from '@playwright/test';
 
-test('Verify dynamic loading works on all browsers', async ({ page }) => {
-    const dynamicLoadingPage = new DynamicLoadingPage(page);
+test('User can handle dynamic loading', async ({ page }) => {
+    test.setTimeout(60000);
 
-    await dynamicLoadingPage.goto();
+    await page.goto('https://the-internet.herokuapp.com/dynamic_loading/1', {
+        waitUntil: 'commit',
+        timeout: 60000
+    });
 
-    await expect(dynamicLoadingPage.startButton).toBeVisible({ timeout: 15000 });
+    await page.getByRole('button', { name: 'Start' }).click();
 
-    await dynamicLoadingPage.startLoading();
-
-    await expect(dynamicLoadingPage.finishText).toBeVisible({ timeout: 20000 });
-
-    await expect(dynamicLoadingPage.finishText).toContainText('Hello World!');
+    await expect(page.locator('#finish h4')).toHaveText('Hello World!', {
+        timeout: 30000
+    });
 });
