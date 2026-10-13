@@ -1,18 +1,16 @@
-import { test, expect } from '@playwright/test';
-import { IFramePage } from '../pages/IFramePage';
+﻿import { test, expect } from '@playwright/test';
+import { DynamicLoadingPage } from '../pages/DynamicLoadingPage';
 
-test('Verify iFrame Text Editing', async ({ page }) => {
+test('Verify dynamic loading works on all browsers', async ({ page }) => {
+    const dynamicLoadingPage = new DynamicLoadingPage(page);
 
-    await page.goto('https://the-internet.herokuapp.com/iframe');
+    await dynamicLoadingPage.goto();
 
-    const iframePage = new IFramePage(page);
+    await expect(dynamicLoadingPage.startButton).toBeVisible({ timeout: 15000 });
 
-    await iframePage.writeText('Hello Dana - Playwright iFrame Test');
+    await dynamicLoadingPage.startLoading();
 
-    await expect(iframePage.editor)
-        .toHaveText('Hello Dana - Playwright iFrame Test');
+    await expect(dynamicLoadingPage.finishText).toBeVisible({ timeout: 20000 });
 
-    await page.pause();
-
-
+    await expect(dynamicLoadingPage.finishText).toContainText('Hello World!');
 });

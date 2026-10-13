@@ -1,42 +1,43 @@
-import { Page, Locator } from '@playwright/test';
+﻿import { Page, Locator, expect } from '@playwright/test';
+import * as path from 'path';
+import * as fs from 'fs';
 
-export class JavaScriptAlertsPage {
+export class FileUploadPage {
     readonly page: Page;
-    readonly alertButton: Locator;
-    readonly confirmButton: Locator;
-    readonly promptButton: Locator;
-    readonly result: Locator;
+    readonly fileInput: Locator;
+    readonly submitButton: Locator;
+    readonly uploadedFilesText: Locator;
+    readonly testFilePath: string;
 
     constructor(page: Page) {
         this.page = page;
+        this.fileInput = page.locator('#file-upload');
+        this.submitButton = page.locator('#file-submit');
+        this.uploadedFilesText = page.locator('#uploaded-files');
 
-        this.alertButton = page.getByRole('button', { name: 'Click for JS Alert' });
-        this.confirmButton = page.getByRole('button', { name: 'Click for JS Confirm' });
-        this.promptButton = page.getByRole('button', { name: 'Click for JS Prompt' });
-        this.result = page.locator('#result');
+        this.testFilePath = path.join(process.cwd(), 'test-file.txt');
+
+        if (!fs.existsSync(this.testFilePath)) {
+            fs.writeFileSync(this.testFilePath, 'محتوى تجريبي');
+        }
     }
 
-    async handleAlert() {
-        this.page.once('dialog', dialog => {
-            dialog.accept();
+    async goto() {
+        await this.page.goto('https://the-internet.herokuapp.com/upload', {
+            waitUntil: 'domcontentloaded',
+            timeout: 90000
         });
-
-        await this.alertButton.click();
     }
 
-    async handleConfirm() {
-        this.page.once('dialog', dialog => {
-            dialog.accept();
-        });
+    async uploadFile() {
+        await this.fileInput.setInputFiles(this.testFilePath);
+        await this.submitButton.click();
 
-        await this.confirmButton.click();
+        // انتظار حتى تظهر صفحة النجاح
+        await expect(this.uploadedFilesText).toBeVisible({ timeout: 20000 });
     }
 
-    async handlePrompt(text: string) {
-        this.page.once('dialog', dialog => {
-            dialog.accept(text);
-        });
-
-        await this.promptButton.click();
+    async verifyUploadSuccess(fileName: string = 'test-file.txt') {
+        await expect(this.uploadedFilesText).toContainText(fileName, { timeout: 10000 });
     }
 }

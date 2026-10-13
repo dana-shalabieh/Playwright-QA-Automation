@@ -1,30 +1,24 @@
-
-import { test, expect } from '@playwright/test';
+﻿import { test, expect } from '@playwright/test';
 import { FramesPage } from '../pages/FramesPage';
 
-test('Verify Nested Frames', async ({ page }) => {
-
-    await page.goto('https://the-internet.herokuapp.com/nested_frames');
-
+test('Verify Nested Frames content on all browsers', async ({ page }) => {
     const framesPage = new FramesPage(page);
 
-    // Verify Left Frame
-    await expect(framesPage.leftFrame)
-        .toHaveText('LEFT');
+    await framesPage.goto();
 
-    // Verify Middle Frame
-    await expect(framesPage.middleFrame)
-        .toHaveText('MIDDLE');
+    // التحقق من الـ frame الأيسر
+    const leftText = await framesPage.getLeftFrameText();
+    expect(leftText.trim()).toContain('LEFT');
 
-    // Verify Right Frame
-    await expect(framesPage.rightFrame)
-        .toHaveText('RIGHT');
+    // التحقق من الـ frame الأوسط
+    const middleText = await framesPage.getMiddleFrameText();
+    expect(middleText.trim()).toContain('MIDDLE');
 
-    // Verify Bottom Frame
-    await expect(framesPage.bottomFrame)
-        .toHaveText('BOTTOM');
+    // التحقق من الـ frame الأيمن
+    const rightText = await framesPage.getRightFrameText();
+    expect(rightText.trim()).toContain('RIGHT');
 
-    await page.pause();
-
+    // التحقق من الـ frame السفلي
+    const bottomText = await framesPage.getBottomFrameText();
+    expect(bottomText.trim()).toContain('BOTTOM');
 });
-

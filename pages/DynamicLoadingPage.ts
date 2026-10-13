@@ -1,4 +1,4 @@
-import { Page, Locator } from '@playwright/test';
+﻿import { Page, Locator } from '@playwright/test';
 
 export class DynamicLoadingPage {
     readonly page: Page;
@@ -7,16 +7,24 @@ export class DynamicLoadingPage {
 
     constructor(page: Page) {
         this.page = page;
+        this.startButton = page.locator('#start button');
+        this.finishText = page.locator('#finish h4');
+    }
 
-        this.startButton = page.getByRole('button', { name: 'Start' });
-        this.finishText = page.getByText('Hello World!');
+    async goto() {
+        await this.page.goto('https://the-internet.herokuapp.com/dynamic_loading/2', {
+            waitUntil: 'networkidle',
+            timeout: 60000
+        });
+
+        // انتظار إضافي للتأكد من تحميل الزر
+        await this.page.waitForSelector('#start button', {
+            state: 'visible',
+            timeout: 10000
+        });
     }
 
     async startLoading() {
         await this.startButton.click();
-    }
-
-    async isFinished() {
-        return await this.finishText.isVisible();
     }
 }
